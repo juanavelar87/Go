@@ -92,10 +92,7 @@ class GoObject:
         self.neighbors={}
     
     def check_liberties(self, x,y):
-        print("EStuve aqui")
-        print(f"############# {x,y}  ################")
         nbh_array=self.board.neighborhood(x,y)
-
         nbh=set(nbh_array)
         nbh.discard(False)
 
@@ -106,13 +103,10 @@ class GoObject:
                 n_x,n_y=self.board.find_neighbor(x,y,n_i)
                 if n_x is not False and n_y is not False:
                     go_obj=self.board.list_of_go_objects[self.board.go_objects_matrix[n_x][n_y]]
-                    if (x,y) in go_obj.liberties and len(go_obj.liberties)==1:
+                    if (x,y) in go_obj.liberties and len(go_obj.liberties)==1 and go_obj.color!=self.board.current_player:
                         return True
+            
             return False
-        print(nbh)
-        print(nbh_array)
-        print(set([self.board.other_player()]))
-        print("#############################")
 
         if set([self.board.other_player()])==nbh:
             print("El suicidio no es la opción")
@@ -186,12 +180,10 @@ class GoBoard:
         local_neighborhood = []
         for index in [-1,1]:
             if y+index>=0 and y+index<self.size:
-                print(y+index)
                 local_neighborhood.append(self.board[x][y+index])
             else:
                 local_neighborhood.append(False)
             if x+index>=0 and x+index<self.size:
-                print(x+index)
                 local_neighborhood.append(self.board[x+index][y])
             else:
                 local_neighborhood.append(False)
