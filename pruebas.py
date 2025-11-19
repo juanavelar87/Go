@@ -20,11 +20,9 @@ class GoObject:
         self.neighbors={}
     
     def add_stone(self, x, y):
-        self.board.board[x][y] = self.board.current_player
         self.board.go_objects_matrix[x][y] = self.id
         self.stones.add((x, y))
         self.update_liberties(x,y)
-        
 
     def update_liberties(self, x,y):
         if self.board.current_player==self.color:
@@ -90,34 +88,7 @@ class GoObject:
         self.stones=set()
         self.liberties=set()
         self.neighbors={}
-    
-    def check_liberties(self, x,y):
-        print("EStuve aqui")
-        print(f"############# {x,y}  ################")
-        nbh_array=self.board.neighborhood(x,y)
-
-        nbh=set(nbh_array)
-        nbh.discard(False)
-
-
-        if ((x,y) in self.liberties and len(self.liberties)==1) and None not in nbh:
-            # Matar y no suicidarse
-            for n_i in range(4):
-                n_x,n_y=self.board.find_neighbor(x,y,n_i)
-                if n_x is not False and n_y is not False:
-                    go_obj=self.board.list_of_go_objects[self.board.go_objects_matrix[n_x][n_y]]
-                    if (x,y) in go_obj.liberties and len(go_obj.liberties)==1:
-                        return True
-            return False
-        print(nbh)
-        print(nbh_array)
-        print(set([self.board.other_player()]))
-        print("#############################")
-
-        if set([self.board.other_player()])==nbh:
-            print("El suicidio no es la opción")
-            return False
-        return True
+        
         
 
 class GoBoard:
@@ -146,6 +117,7 @@ class GoBoard:
                     moves.append((x, y))
         return moves
     
+    # TODO: Implement full legality checks
     def is_move_legal(self, x, y):
         if self.board[x][y] is not None:
             print(f"Ya hay una piedra ahi: {self.board[x][y]}")
@@ -154,6 +126,9 @@ class GoBoard:
         nbh.discard(False)
         if None in nbh:
             return True
+        if set([self.other_player()])==nbh:
+            print("El suicidio no es la opción")
+            return False
         return True
 
     def other_player(self):
@@ -185,55 +160,43 @@ class GoBoard:
     def neighborhood(self, x, y):
         local_neighborhood = []
         for index in [-1,1]:
-            if y+index>=0 and y+index<self.size:
-                print(y+index)
+            if y+index>=0:
                 local_neighborhood.append(self.board[x][y+index])
             else:
                 local_neighborhood.append(False)
-            if x+index>=0 and x+index<self.size:
-                print(x+index)
+            if x+index>=0:
                 local_neighborhood.append(self.board[x+index][y])
             else:
                 local_neighborhood.append(False)
         return local_neighborhood
 
     def update_objects(self,x,y):
-        piece_color= self.current_player
+        piece_color= self.board[x][y]
         nbh = self.neighborhood(x,y)
         object_near = False
         for n_i in range(len(nbh)):
             if object_near is not False and nbh[n_i]==piece_color:
                 n_x,n_y=self.find_neighbor(x,y,n_i)
                 go_object=self.list_of_go_objects[self.go_objects_matrix[n_x][n_y]]
-                if go_object.id != object_near.id:
-                    object_near.merge(go_object)
+                object_near.merge(go_object)
             if nbh[n_i]==piece_color:
                 n_x,n_y=self.find_neighbor(x,y,n_i)
                 obj_index=self.go_objects_matrix[n_x][n_y]
                 object_near=self.list_of_go_objects[obj_index]
-                print(f"se intento {x,y}")
-                if object_near.check_liberties(x,y):
-                    object_near.add_stone(x,y)
-                else:
-                    return False
-                
+                self.list_of_go_objects[obj_index].add_stone(x,y)
+        
         if not object_near:
             new_object = GoObject(len(self.list_of_go_objects),piece_color, self)
             self.list_of_go_objects.append(new_object)
-            if new_object.check_liberties(x,y):
-                new_object.add_stone(x,y)
-            else:
-                return False
-        return True
+            new_object.add_stone(x,y)
 
     def place_stone(self, x, y):
         if self.is_move_legal(x,y) is False:
             return False  
+        
+        self.board[x][y] = self.current_player
+        self.update_objects(x,y)
         STEPS.append((x,y,self.current_player))
-        if not self.update_objects(x,y):
-            return False
-        self.display_terminal()
-        self.display_terminal_objects()
         self.current_player = self.other_player()
         return True
 
@@ -260,59 +223,65 @@ class GoBoard:
         print("\n".join(lines))
 
     def display_terminal_objects(self):
-        # --- 1. Configuración de Colores ANSI ---
-        PURPLE = '\033[95m' # Morado claro (Magenta)
-        RESET = '\033[0m'   # Resetear color (MUY IMPORTANTE)
-        
-        # --- 2. Preparar conjunto de vecinos (Optimizado) ---
-        # Usamos set() y tuple() para que la búsqueda sea rápida y correcta
-        nei = {
-            tuple(coord_tuple) 
-            for n in self.list_of_go_objects # Asumo que es self, si es global usa 'g'
-            for neighbor_set in n.neighbors.values()
-            for coord_tuple in neighbor_set
-        }
+        """
+        Resalta todos los vecinos de todos los objetos.
+        - Rojo: obj_id tiene a otro como vecino
+        - Azul: otros objetos tienen a obj_id como vecino
+        - Morado: relación recíproca
+        """
+
+        RED = "\033[91m"
+        BLUE = "\033[94m"
+        PURPLE = "\033[95m"
+        RESET = "\033[0m"
 
         lines = []
-        
-        # Cabecera de columnas (eje X)
-        # Usamos :^3 para centrar los números en un espacio de 3 caracteres
-        header_nums = " ".join([f"{x:^3}" for x in range(self.size)])
-        lines.append(f"    {header_nums}")
-        lines.append("   " + "_" * (self.size * 3 + 1)) 
-        
+        lines.append("   "+"  ".join(map(str, range(self.size))))
+        lines.append("  "+"_" * (self.size * 3 + 1))
+
         for y in range(self.size):
-            # Cabecera de fila (eje Y)
-            row_parts = [f"{y:>2} |"] 
-            
+            row = [" " + str(y) +"|"]
+
             for x in range(self.size):
-                cell = self.go_objects_matrix[x][y]
-                
-                # --- 3. Lógica de Contenido y Formato ---
-                if cell is None:
-                    # Espacio vacío de 3 caracteres
-                    content = " . " 
-                    row_parts.append(content)
+                obj_id = self.go_objects_matrix[x][y]
+
+                if obj_id is None:
+                    row.append("  |")
+                    continue
+
+                my_obj = self.list_of_go_objects[obj_id]
+
+                # Determinar si este objeto es vecino o es "vecinado"
+                is_neighbor_of_any = False   # rojo
+                contains_me_in_any = False   # azul
+
+                # Recorremos TODOS los objetos para detectar relaciones
+                for other_id, other_obj in enumerate(self.list_of_go_objects):
+
+                    if other_obj.stones:
+                        # A -> B ? (soy vecino suyo)
+                        if obj_id in other_obj.neighbors:
+                            contains_me_in_any = True
+
+                        # B -> A ? (él es mi vecino)
+                        if other_id in my_obj.neighbors:
+                            is_neighbor_of_any = True
+
+                # Decidir color
+                if is_neighbor_of_any and contains_me_in_any:
+                    color = PURPLE
+                elif is_neighbor_of_any:
+                    color = RED
+                elif contains_me_in_any:
+                    color = BLUE
                 else:
-                    # Convertimos el objeto a string
-                    obj_str = str(cell) 
-                    
-                    # Forzamos que el texto ocupe 3 espacios y se centre (:^3)
-                    # Esto asegura que la tabla no se mueva
-                    formatted_cell = f"{obj_str:^3}"
-                    
-                    # --- 4. Aplicar Color si es vecino ---
-                    if (x, y) in nei:
-                        # Envolvemos SOLO el texto formateado con los códigos de color
-                        row_parts.append(f"{PURPLE}{formatted_cell}{RESET}")
-                    else:
-                        row_parts.append(formatted_cell)
-                        
-            row_parts.append("|")
-            lines.append("".join(row_parts))
-        
-        lines.append("   " + "‾" * (self.size * 3 + 1)) 
-        
+                    color = ""
+
+                row.append(f"{color}{obj_id:2}{RESET}|")
+
+            lines.append("".join(row))
+
+        lines.append("  "+"‾" * (self.size * 3 + 1))
         print("\n".join(lines))
     def init_pygame(self):
         """Inicializa pygame y crea la ventana"""
@@ -411,122 +380,76 @@ class GoBoard:
             
             self.display_gui()
             self.clock.tick(60)
-        for g_obj in g.list_of_go_objects:
-            print(g_obj.id)
-            print(g_obj.neighbors)
-        for s in STEPS:
-            print(f"g.place_stone({s[0]},{s[1]})")
+        
         pygame.quit()
         sys.exit()
-
 g=GoBoard(size=9)
-g.place_stone(0,0)
-g.place_stone(8,0)
-g.place_stone(8,8)
-g.place_stone(0,8)
-g.place_stone(1,7)
-g.place_stone(2,7)
-g.place_stone(1,8)
-g.place_stone(1,6)
-g.place_stone(0,7)
-g.place_stone(2,6)
-g.place_stone(1,5)
-g.place_stone(3,5)
-g.place_stone(2,4)
-g.place_stone(2,5)
-g.place_stone(1,4)
-g.place_stone(3,4)
-g.place_stone(4,4)
 g.place_stone(3,3)
-g.place_stone(2,3)
-g.place_stone(3,2)
-g.place_stone(2,2)
-g.place_stone(4,5)
-g.place_stone(3,1)
-g.place_stone(2,1)
-g.place_stone(4,1)
-g.place_stone(4,2)
-g.place_stone(5,2)
-g.place_stone(1,1)
 g.place_stone(4,3)
-g.place_stone(5,5)
+g.place_stone(4,4)
+g.place_stone(3,4)
 g.place_stone(5,3)
-g.place_stone(5,4)
-g.place_stone(3,6)
+g.place_stone(3,5)
+g.place_stone(4,2)
 g.place_stone(1,2)
-g.place_stone(3,7)
-g.place_stone(1,3)
-g.place_stone(4,6)
-g.place_stone(0,3)
-g.place_stone(5,6)
-g.place_stone(0,2)
-g.place_stone(6,5)
-g.place_stone(0,4)
-g.place_stone(6,4)
-g.place_stone(0,5)
-g.place_stone(0,6)
-g.place_stone(2,8)
-g.place_stone(3,8)
-g.place_stone(6,7)
-g.place_stone(1,5)
-g.place_stone(6,8)
-g.place_stone(1,4)
-g.place_stone(5,8)
-g.place_stone(2,4)
-g.place_stone(4,8)
+g.place_stone(4,3)
 g.place_stone(2,3)
-g.place_stone(5,7)
 g.place_stone(2,2)
-g.place_stone(2,6)
-g.place_stone(2,5)
-g.place_stone(2,7)
-g.place_stone(2,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
+g.place_stone(2,1)
+g.place_stone(1,1)
+g.place_stone(3,2)
+g.place_stone(1,3)
+g.place_stone(2,2)
+g.place_stone(0,2)
+g.place_stone(2,4)
+g.place_stone(1,4)
+g.place_stone(3,1)
+g.place_stone(6,2)
+g.place_stone(6,3)
+g.place_stone(5,2)
+g.place_stone(5,1)
+g.place_stone(4,6)
+g.place_stone(7,2)
 g.place_stone(4,7)
-g.place_stone(7,8)
-g.place_stone(8,6)
-g.place_stone(7,7)
-g.place_stone(7,5)
-g.place_stone(7,6)
-g.place_stone(8,5)
+g.place_stone(4,1)
+g.place_stone(5,4)
+g.place_stone(5,5)
+g.place_stone(6,7)
+g.place_stone(6,4)
 g.place_stone(6,6)
-g.place_stone(4,7)
+g.place_stone(4,5)
+g.place_stone(5,6)
+g.place_stone(6,1)
+g.place_stone(5,4)
+g.place_stone(6,5)
+g.place_stone(4,4)
+g.place_stone(2,5)
+g.place_stone(3,3)
+g.place_stone(4,3)
+g.place_stone(4,2)
+g.place_stone(5,3)
+g.place_stone(7,5)
+g.place_stone(2,6)
+g.place_stone(3,6)
+g.place_stone(2,7)
+g.place_stone(3,7)
+g.place_stone(4,4)
+g.place_stone(6,2)
+g.place_stone(5,2)
+g.place_stone(1,5)
 g.place_stone(1,6)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
+g.place_stone(0,5)
+g.place_stone(0,4)
+g.place_stone(0,3)
+g.place_stone(0,6)
 g.place_stone(0,1)
-g.place_stone(2,0)
-g.place_stone(1,0)
-g.place_stone(4,0)
 g.place_stone(0,0)
-try:
-    g.run_gui()
-except Exception as e:
-    print(e)
-    for g_obj in g.list_of_go_objects:
-        print(g_obj.id)
-        print(g_obj.neighbors)
-    for s in STEPS:
-        print(f"g.place_stone({s[0]},{s[1]})")
+g.place_stone(1,0)
+g.place_stone(2,0)
+g.place_stone(0,0)
+g.place_stone(3,0)
+g.place_stone(0,4)
+g.place_stone(0,4)
+g.display_terminal()
+g.display_terminal_objects()
+
