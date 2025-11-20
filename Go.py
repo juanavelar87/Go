@@ -96,13 +96,14 @@ class GoObject:
         nbh=set(nbh_array)
         nbh.discard(False)
 
-
-        if ((x,y) in self.liberties and len(self.liberties)==1) and None not in nbh:
+        print(self.liberties)
+        if (((x,y) in self.liberties and len(self.liberties)==1) or len(self.liberties)==0) and None not in nbh:
             # Matar y no suicidarse
             for n_i in range(4):
                 n_x,n_y=self.board.find_neighbor(x,y,n_i)
                 if n_x is not False and n_y is not False:
                     go_obj=self.board.list_of_go_objects[self.board.go_objects_matrix[n_x][n_y]]
+                    print(go_obj)
                     if (x,y) in go_obj.liberties and len(go_obj.liberties)==1 and go_obj.color!=self.board.current_player:
                         return True
             
@@ -133,11 +134,12 @@ class GoBoard:
         self.running = False
     
     def available_moves(self):
-        moves = []
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.board[x][y] is None and self.is_move_legal(x, y):
-                    moves.append((x, y))
+        objects_of_current_player = [obj for obj in self.list_of_go_objects if obj.color == self.current_player]
+        moves = set()
+        for obj in objects_of_current_player:
+            for (x,y) in obj.liberties:
+                if self.is_move_legal(x,y) and obj.check_liberties(x,y):
+                    moves.add((x,y))
         return moves
     
     def is_move_legal(self, x, y):
@@ -365,7 +367,7 @@ class GoBoard:
         self.screen.blit(text, (10, self.window_size + 10))
         
         # Mostrar capturas
-        captures_text = font.render(f"Capturas - Negro: {self.captured_stones[BLACK]}, Blanco: {self.captured_stones[WHITE]}", True, BLACK_COLOR)
+        captures_text = font.render(f"Capturadas - Negro: {self.captured_stones[BLACK]}, Blanco: {self.captured_stones[WHITE]}", True, BLACK_COLOR)
         self.screen.blit(captures_text, (10, self.window_size + 50))
         
         pygame.display.flip()
@@ -412,107 +414,7 @@ class GoBoard:
         sys.exit()
 
 g=GoBoard(size=9)
-g.place_stone(0,0)
-g.place_stone(8,0)
-g.place_stone(8,8)
-g.place_stone(0,8)
-g.place_stone(1,7)
-g.place_stone(2,7)
-g.place_stone(1,8)
-g.place_stone(1,6)
-g.place_stone(0,7)
-g.place_stone(2,6)
-g.place_stone(1,5)
-g.place_stone(3,5)
-g.place_stone(2,4)
-g.place_stone(2,5)
-g.place_stone(1,4)
-g.place_stone(3,4)
-g.place_stone(4,4)
-g.place_stone(3,3)
-g.place_stone(2,3)
-g.place_stone(3,2)
-g.place_stone(2,2)
-g.place_stone(4,5)
-g.place_stone(3,1)
-g.place_stone(2,1)
-g.place_stone(4,1)
-g.place_stone(4,2)
-g.place_stone(5,2)
-g.place_stone(1,1)
-g.place_stone(4,3)
-g.place_stone(5,5)
-g.place_stone(5,3)
-g.place_stone(5,4)
-g.place_stone(3,6)
-g.place_stone(1,2)
-g.place_stone(3,7)
-g.place_stone(1,3)
-g.place_stone(4,6)
-g.place_stone(0,3)
-g.place_stone(5,6)
-g.place_stone(0,2)
-g.place_stone(6,5)
-g.place_stone(0,4)
-g.place_stone(6,4)
-g.place_stone(0,5)
-g.place_stone(0,6)
-g.place_stone(2,8)
-g.place_stone(3,8)
-g.place_stone(6,7)
-g.place_stone(1,5)
-g.place_stone(6,8)
-g.place_stone(1,4)
-g.place_stone(5,8)
-g.place_stone(2,4)
-g.place_stone(4,8)
-g.place_stone(2,3)
-g.place_stone(5,7)
-g.place_stone(2,2)
-g.place_stone(2,6)
-g.place_stone(2,5)
-g.place_stone(2,7)
-g.place_stone(2,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(4,7)
-g.place_stone(7,8)
-g.place_stone(8,6)
-g.place_stone(7,7)
-g.place_stone(7,5)
-g.place_stone(7,6)
-g.place_stone(8,5)
-g.place_stone(6,6)
-g.place_stone(4,7)
-g.place_stone(1,6)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,8)
-g.place_stone(0,1)
-g.place_stone(2,0)
-g.place_stone(1,0)
-g.place_stone(4,0)
-g.place_stone(0,0)
+
 try:
     g.run_gui()
 except Exception as e:
