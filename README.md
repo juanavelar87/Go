@@ -1,4 +1,4 @@
-# Go Game con Q-Learning AI 🀄🤖
+# Go Game con Q-Learning AI ⚫️⚪️
 
 Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una Inteligencia Artificial basada en **Reinforcement Learning (Q-Learning)**. Incluye una interfaz gráfica interactiva y herramientas de visualización para entender el proceso de aprendizaje de la IA.
 
