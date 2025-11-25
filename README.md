@@ -1,5 +1,13 @@
 # Go Game con Q-Learning AI ⚫️⚪️
 
+## Autores
+
+- **Juan Avelar**
+- **Diego Mares**
+
+Proyecto para la materia de *Modelos Bioinspirados*, Universidad Iberoamericana León.
+
+
 Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una Inteligencia Artificial basada en **Reinforcement Learning (Q-Learning)**. Incluye una interfaz gráfica interactiva y herramientas de visualización para entender el proceso de aprendizaje de la IA. Esto se hace con el propósito de poner en práctica los temas vistos en clase a lo largo de la mtaeria y como estos se pueden aplicr. 
 
 ## 📋 Características
