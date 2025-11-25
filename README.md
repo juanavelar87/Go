@@ -4,8 +4,8 @@ Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una I
 ## Institucion: Universidad Iberoamericana León
 
 ## Autores
-- **Juan Avelar**
-- **Diego Mares**
+- **Juan Yael Vasquez Avelar**
+- **Diego Mares Rodriguez**
 
 ## 📋 Características
 
