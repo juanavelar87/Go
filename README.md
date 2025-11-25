@@ -90,6 +90,10 @@ Entrenamos por 1,000,000 episodios en tableros 3×3 y 4×4:
 - En 3×3 el agente domina rápidamente.
 - En 4×4 el espacio de estados explota y muchos Q quedan sin exploración.
 
+## Limitaciones (en nuestro caso trabajado)
+- Q-Learning tabular no escala a tableros grandes.
+- El self-play ε-greedy no introduce suficiente exploración en 4×4.
+- El estado no incluye historia → no permite reglas como Ko.
 
 ---
 *Desarrollado para el curso de Matemáticas para IA.*
