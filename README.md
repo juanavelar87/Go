@@ -78,5 +78,12 @@ La IA aprende a través de la experiencia simulada.
 Durante el entrenamiento, la IA explora millones de posibilidades y actualiza su tabla Q usando la ecuación de Bellman:
 $$Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma \max Q(s',a') - Q(s,a)]$$
 
+## Experimentos y resultados
+Entrenamos por 1,000,000 episodios en tableros 3×3 y 4×4:
+
+- En 3×3 el agente domina rápidamente.
+- En 4×4 el espacio de estados explota y muchos Q quedan sin exploración.
+
+
 ---
 *Desarrollado para el curso de Matemáticas para IA.*
