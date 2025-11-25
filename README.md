@@ -1,12 +1,13 @@
 # Go Game con Q-Learning AI ⚫️⚪️
 
-Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una Inteligencia Artificial basada en **Reinforcement Learning (Q-Learning)**. Incluye una interfaz gráfica interactiva y herramientas de visualización para entender el proceso de aprendizaje de la IA.
+Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una Inteligencia Artificial basada en **Reinforcement Learning (Q-Learning)**. Incluye una interfaz gráfica interactiva y herramientas de visualización para entender el proceso de aprendizaje de la IA. Esto se hace con el propósito de poner en práctica los temas vistos en clase a lo largo de la mtaeria y como estos se pueden aplicr. 
 
 ## 📋 Características
 
 ### Motor de Juego
 - Implementación completa de las reglas de Go (captura de piedras, libertades, grupos).
 - Soporte para tableros de tamaño variable (por defecto 3x3 para demostración de aprendizaje rápido, configurable a 9x9 o 19x19).
+- Nota: Ya una vez revisado la parte del proyecto con las pruebas, se compreuba que funciona de mejor manera principalemnte en elementos de tablero 3x3.
 
 ### Inteligencia Artificial (Q-Learning)
 - **Algoritmo**: Q-Learning tabular con estrategia Epsilon-Greedy.
@@ -23,7 +24,7 @@ Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una I
 
 ## 🛠️ Requisitos
 
-El proyecto requiere Python 3 y las siguientes librerías:
+El proyecto requiere Python 3 y las siguientes librerías para que se pueda utilizar de forma óptima:
 
 ```bash
 pip install pygame tqdm
