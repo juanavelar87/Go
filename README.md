@@ -1,8 +1,8 @@
 # Go Game con Q-Learning AI ⚫️⚪️
 
-## Autores
 ## Institucion: Universidad Iberoamericana León
 
+## Autores
 - **Juan Avelar**
 - **Diego Mares**
 
