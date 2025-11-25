@@ -18,6 +18,15 @@ Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una I
   - Control de territorio (Recompensa moderada).
 - **Visualización**: Muestra en tiempo real los valores Q (expectativa de recompensa) de cada casilla en la terminal.
 
+### Detalles del algoritmo Q-Learning
+
+- Política: ε-greedy
+- Parámetros:
+  - α = 0.1
+  - γ = 0.9
+  - ε = 0.3
+
+
 ### Interfaz
 - **GUI (Pygame)**: Interfaz gráfica limpia y responsiva para jugar.
 - **Terminal**: Visualización ASCII del tablero con "mapa de calor" numérico de la toma de decisiones de la IA.
