@@ -35,6 +35,7 @@ Este proyecto implementa el juego de mesa **Go** en Python, acompañado de una I
 
 
 ### Interfaz
+
 - **GUI (Pygame)**: Interfaz gráfica limpia y responsiva para jugar.
 - **Terminal**: Visualización ASCII del tablero con "mapa de calor" numérico de la toma de decisiones de la IA.
 
